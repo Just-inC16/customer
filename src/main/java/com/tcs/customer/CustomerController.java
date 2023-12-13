@@ -44,7 +44,7 @@ public class CustomerController {
 		return ResponseEntity.ok(CustomerDto);
 	}
 
-	@CircuitBreaker(name = "notification", fallbackMethod = "fallbackMethod")
+	@CircuitBreaker(name = "customer", fallbackMethod = "fallbackMethod")
 	@PostMapping("/signup")
 	public String signup(@RequestBody Customer newCustomer) {
 		try {
@@ -67,7 +67,9 @@ public class CustomerController {
 			customerRepository.save(newCustomer);
 
 			// Communicate with notification service
-			HttpEntity<String> requestBody = createRequestBody();
+			final String ENTITY = "Customer";
+			final String MESSAGE = "Successful customer signup";
+			HttpEntity<String> requestBody = createRequestBody(ENTITY, MESSAGE);
 			return restTemplate.postForObject("http://localhost:8084/api/v1/notifications/send", requestBody,
 					String.class);
 		} catch (NameException e) {
@@ -79,6 +81,18 @@ public class CustomerController {
 		}
 		return "Unsuccessful signup!";
 	}
+
+	// Assume customer exist
+//	@CircuitBreaker(name = "customer", fallbackMethod = "fallbackMethod")
+//	@PostMapping("/reservation")
+//	public String reservation(@RequestBody ReservationDto reservation) {
+////		return restTemplate.getForObject("http://localhost:8081/api/v1/reservations/reserveHotel" + customerId,
+////				String.class);
+//		// Communicate with reservation service
+////		HttpEntity<String> requestBody = createRequestBody();
+////		return restTemplate.postForObject("http://localhost:8084/api/v1/notifications/send", requestBody, String.class);
+//		return null;
+//	}
 
 	public String fallbackMethod() {
 		return "Something went wrong :(";
@@ -103,16 +117,17 @@ public class CustomerController {
 		return password.length() >= AT_LEAST_EIGHT_CHARACTERS;
 	}
 
-	public HttpEntity<String> createRequestBody() {
+	public HttpEntity<String> createRequestBody(String entity, String message) {
 		// Create headers with the content type
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
 		// Create the request body (replace this with your actual JSON or other content)
-		String requestBody = "{ \"entity\":\"test2\" , \"message\":\"Successful use of resttemplates\" }";
+		String requestBody = "{ \"entity\":\"" + entity + "\" , \"message\":\"" + message + "\" }";
 
 		// Create an HttpEntity with the request body and headers
 		HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 		return requestEntity;
 	}
+
 }
