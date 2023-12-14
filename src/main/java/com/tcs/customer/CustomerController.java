@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.tcs.customer.Dto.Reservation;
 import com.tcs.customer.exceptions.EmailException;
 import com.tcs.customer.exceptions.NameException;
 import com.tcs.customer.exceptions.PasswordException;
@@ -44,7 +45,7 @@ public class CustomerController {
 		return ResponseEntity.ok(CustomerDto);
 	}
 
-	@CircuitBreaker(name = "customer", fallbackMethod = "fallbackMethod")
+	@CircuitBreaker(name = "signup", fallbackMethod = "fallbackMethod")
 	@PostMapping("/signup")
 	public String signup(@RequestBody Customer newCustomer) {
 		try {
@@ -83,16 +84,14 @@ public class CustomerController {
 	}
 
 	// Assume customer exist
-//	@CircuitBreaker(name = "customer", fallbackMethod = "fallbackMethod")
-//	@PostMapping("/reservation")
-//	public String reservation(@RequestBody ReservationDto reservation) {
-////		return restTemplate.getForObject("http://localhost:8081/api/v1/reservations/reserveHotel" + customerId,
-////				String.class);
-//		// Communicate with reservation service
-////		HttpEntity<String> requestBody = createRequestBody();
-////		return restTemplate.postForObject("http://localhost:8084/api/v1/notifications/send", requestBody, String.class);
-//		return null;
-//	}
+	@CircuitBreaker(name = "reserve", fallbackMethod = "fallbackMethod")
+	@PostMapping("/reserve")
+	public String reservation(@RequestBody Reservation reservation) {
+		// Communicate with reservation service
+		HttpEntity<String> requestBody = createRequestBody2(reservation);
+		return restTemplate.postForObject("http://localhost:8081/api/v1/reservations/reserveHotel", requestBody,
+				String.class);
+	}
 
 	public String fallbackMethod() {
 		return "Something went wrong :(";
@@ -125,6 +124,24 @@ public class CustomerController {
 		// Create the request body (replace this with your actual JSON or other content)
 		String requestBody = "{ \"entity\":\"" + entity + "\" , \"message\":\"" + message + "\" }";
 
+		// Create an HttpEntity with the request body and headers
+		HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+		return requestEntity;
+	}
+
+	public HttpEntity<String> createRequestBody2(Reservation reservation) {
+		// Create headers with the content type
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		// Create the request body (replace this with your actual JSON or other content)
+//		Gson gson = new Gson();
+//		String requestBody = gson.toJson(reservation);
+//		System.out.println("****************************" + requestBody);
+		String requestBody = "{ \"customerId\":\"" + reservation.getCustomerId() + "\" , \"hotelId\":\""
+				+ reservation.getHotelId() + "\", \"startDate\":\"" + reservation.getStartDate() + "\", \"endDate\":\""
+				+ reservation.getEndDate() + "\" }";
+		System.out.println("Request body" + requestBody);
 		// Create an HttpEntity with the request body and headers
 		HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 		return requestEntity;
