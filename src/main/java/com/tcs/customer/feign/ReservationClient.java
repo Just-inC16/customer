@@ -10,8 +10,8 @@ import com.tcs.customer.Dto.Notification;
 import com.tcs.customer.Dto.Reservation;
 
 @Component
-@FeignClient(name = "reservation", url = "localhost:8081")
+@FeignClient(name = "api-gateway", url = "localhost:8085")
 public interface ReservationClient {
-	@PostMapping("/api/v1/reservations/reserveHotel")
+	@PostMapping("/reservation/api/v1/reservations/reserveHotel")
 	ResponseEntity<Notification> reserveHotel(@RequestBody Reservation reservation);
 }
