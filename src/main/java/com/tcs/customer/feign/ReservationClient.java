@@ -6,11 +6,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.tcs.customer.Dto.Reservation;
-import com.tcs.customer.config.ReservationConfig;
 
 @Component
-@FeignClient(name = "reservation", url = "localhost:8081", configuration = ReservationConfig.class)
+@FeignClient(name = "reservation", url = "localhost:8081")
 public interface ReservationClient {
-	@PostMapping("/reserveHotel")
+	@PostMapping("/api/v1/reservations/reserveHotel")
 	String reserveHotel(@RequestBody Reservation reservation);
 }

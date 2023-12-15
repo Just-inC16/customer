@@ -16,6 +16,7 @@ import com.tcs.customer.Dto.Reservation;
 import com.tcs.customer.exceptions.EmailException;
 import com.tcs.customer.exceptions.NameException;
 import com.tcs.customer.exceptions.PasswordException;
+import com.tcs.customer.feign.ReservationClient;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 
@@ -25,10 +26,13 @@ public class CustomerController {
 
 	private CustomerRepository customerRepository;
 	private final RestTemplate restTemplate;
+	private ReservationClient reservationClient;
 
-	public CustomerController(CustomerRepository customerRepository, RestTemplate restTemplate) {
+	public CustomerController(CustomerRepository customerRepository, RestTemplate restTemplate,
+			ReservationClient reservationClient) {
 		this.customerRepository = customerRepository;
 		this.restTemplate = restTemplate;
+		this.reservationClient = reservationClient;
 	}
 
 	@PostMapping("/register")
@@ -87,10 +91,7 @@ public class CustomerController {
 	@CircuitBreaker(name = "reserve", fallbackMethod = "fallbackMethod")
 	@PostMapping("/reserve")
 	public String reservation(@RequestBody Reservation reservation) {
-		// Communicate with reservation service
-		HttpEntity<String> requestBody = createRequestBody2(reservation);
-		return restTemplate.postForObject("http://localhost:8081/api/v1/reservations/reserveHotel", requestBody,
-				String.class);
+		return reservationClient.reserveHotel(reservation);
 	}
 
 	public String fallbackMethod() {
@@ -124,24 +125,6 @@ public class CustomerController {
 		// Create the request body (replace this with your actual JSON or other content)
 		String requestBody = "{ \"entity\":\"" + entity + "\" , \"message\":\"" + message + "\" }";
 
-		// Create an HttpEntity with the request body and headers
-		HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
-		return requestEntity;
-	}
-
-	public HttpEntity<String> createRequestBody2(Reservation reservation) {
-		// Create headers with the content type
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-
-		// Create the request body (replace this with your actual JSON or other content)
-//		Gson gson = new Gson();
-//		String requestBody = gson.toJson(reservation);
-//		System.out.println("****************************" + requestBody);
-		String requestBody = "{ \"customerId\":\"" + reservation.getCustomerId() + "\" , \"hotelId\":\""
-				+ reservation.getHotelId() + "\", \"startDate\":\"" + reservation.getStartDate() + "\", \"endDate\":\""
-				+ reservation.getEndDate() + "\" }";
-		System.out.println("Request body" + requestBody);
 		// Create an HttpEntity with the request body and headers
 		HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 		return requestEntity;

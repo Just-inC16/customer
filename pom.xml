@@ -70,9 +70,9 @@
 		    <version>2.8.9</version> <!-- Use the latest version available -->
 		</dependency>
 		 <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-starter-openfeign</artifactId>
-    </dependency>
+	      <groupId>org.springframework.cloud</groupId>
+	      <artifactId>spring-cloud-starter-openfeign</artifactId>
+	    </dependency>
 	</dependencies>
   <dependencyManagement>
     <dependencies>
