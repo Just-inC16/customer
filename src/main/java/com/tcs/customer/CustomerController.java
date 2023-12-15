@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.tcs.customer.Dto.Notification;
 import com.tcs.customer.Dto.Reservation;
 import com.tcs.customer.exceptions.EmailException;
 import com.tcs.customer.exceptions.NameException;
@@ -90,7 +91,7 @@ public class CustomerController {
 	// Assume customer exist
 	@CircuitBreaker(name = "reserve", fallbackMethod = "fallbackMethod")
 	@PostMapping("/reserve")
-	public String reservation(@RequestBody Reservation reservation) {
+	public ResponseEntity<Notification> reservation(@RequestBody Reservation reservation) {
 		return reservationClient.reserveHotel(reservation);
 	}
 
